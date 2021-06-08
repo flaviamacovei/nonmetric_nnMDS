@@ -11,3 +11,14 @@ used instead. Here, we propose a neural network based approach for solving the m
 orders of magnitude faster than previous state-of-the-art approaches, and hence scales to data sets with up to a few million cells. At
 the same time, it provides a non-linear mapping between high- and low-dimensional space that can place previously unseen cells in
 the same embedding.
+
+Installing
+====
+
+Requirements:
+
+Python 3.6 or greater
+numpy
+scipy
+scikit-learn >= 0.23.0
+pytorch
