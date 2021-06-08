@@ -1,7 +1,8 @@
 # nnMDS
-====
+
 Metric Multidimensional Scaling for Large Single-Cell Data Sets using Neural Networks 
 ====
+
 Metric multidimensional scaling is one of the classical methods for embedding data into low-dimensional Euclidean space.
 It creates the low-dimensional embedding by approximately preserving the pairwise distances between the input points. However,
 current state-of-the-art approaches only scale to a few thousand data points. For larger data sets such as those occurring in single-cell
