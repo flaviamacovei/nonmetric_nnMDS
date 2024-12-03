@@ -29,6 +29,35 @@ class nnMDS(nn.Module):
     def forward(X : torch.Tensor) -> torch.Tensor:
         return self.encode(X)
 
+class nonmetric_nnMDS(nn.Module):
+    def __init__(self, in_dim : int, out_dim : int, linear_dim = None):
+        super().__init__()
+        if linear_dim is None:
+            linear_dim = in_dim
+
+        self.nonmetric_encode = nn.Sequential(
+            nn.Linear(in_features = in_dim, out_features = in_dim),
+            nn.Sigmoid(),
+        )
+
+        self.encode = nn.Sequential(
+            self.nonmetric_encode,
+            nn.Linear(in_features = in_dim, out_features = linear_dim),
+            nn.Tanh(),
+            nn.Linear(in_features = linear_dim, out_features = out_dim)
+            )
+
+        # self.apply(self._init_weights)
+
+    def _init_weights(self, m):
+        if isinstance(m, nn.Linear):
+            m.weight.data.normal_(mean = 0.0, std = 1.0)
+            if m.bias is not None:
+                m.bias.data.zero_()
+    def forward(X : torch.Tensor) -> torch.Tensor:
+        return self.encode(X)
+
+
 # datasets for training
 
 import h5py # for loading USPS data
