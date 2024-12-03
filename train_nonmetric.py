@@ -12,11 +12,11 @@ from model import nonmetric_nnMDS
 from torch.utils.data import DataLoader
 
 from nonmetric_loss import process_loss, compute_loss
-from colour_data import dataset
+from data import train_dataset, test_dataset
 from utils import visualise_embeddings, visualise
 
 
-def train(model, rundir, epochs, learning_rate, batch_size, device, file_name, load_state, wandb_log):
+def train(model, dataset, rundir, epochs, learning_rate, batch_size, device, file_name, load_state, wandb_log):
     if not load_state is None:
         state_dict = torch.load(load_state, map_location=(None if device != 'cpu' else 'cpu'))
         model.load_state_dict(state_dict)
@@ -27,8 +27,6 @@ def train(model, rundir, epochs, learning_rate, batch_size, device, file_name, l
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0, patience=8, cooldown=0, min_lr=1e-5)#,
                                                            #verbose=True)
     start_time = datetime.now()
-
-    final_loss = 0
 
     for epoch in range(epochs):
         change = datetime.now() - start_time
@@ -50,9 +48,6 @@ def train(model, rundir, epochs, learning_rate, batch_size, device, file_name, l
             batch_loss.backward()
             optimizer.step()
 
-            with torch.no_grad():
-                visualise(res, f"model_epoch_{epoch + 1}_{i}")
-
         scheduler.step(loss)
         print(f'loss: {loss:0.4f}')
         if wandb_log:
@@ -72,7 +67,7 @@ def get_parser():
     parser.add_argument('--learning_rate', default=1e-03, type=float)
     parser.add_argument('--weight_decay', default=0.01, type=float)
     parser.add_argument('--epochs', default=50, type=int)
-    parser.add_argument('--batch_size', default=10, type=int)
+    parser.add_argument('--batch_size', default=256, type=int)
     parser.add_argument('--name', default=None)
     parser.add_argument('--load', default=None)
     parser.add_argument('--out_dim', type=int, default=2)
@@ -96,18 +91,18 @@ if __name__ == '__main__':
             }
         )
 
-    in_dim = dataset.tensors[0].shape[1]
+    in_dim = train_dataset.tensors[0].shape[1]
     model = nonmetric_nnMDS(in_dim, args.out_dim)
 
     train_time_start = datetime.now()
-    train(model, args.rundir, args.epochs, args.learning_rate, args.batch_size, device, args.name,
+    train(model, train_dataset, args.rundir, args.epochs, args.learning_rate, args.batch_size, device, args.name,
                           args.load, args.wandb_log)
     train_time = datetime.now() - train_time_start
 
     model.eval()
 
-    refs_dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False)
-    preds_model = model.encode(dataset.tensors[0].to(device))
+    refs_dataloader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
+    preds_model = model.encode(test_dataset.tensors[0].to(device))
     preds_dataset = TensorDataset(preds_model)
     preds_dataloader = DataLoader(preds_dataset, batch_size=args.batch_size, shuffle=False)
     final_loss_model = process_loss(preds_dataloader=preds_dataloader, refs_dataloader=refs_dataloader, device=device)
@@ -121,7 +116,10 @@ if __name__ == '__main__':
         random_state=42,
     )
 
-    diss_matrix = torch.cdist(dataset.tensors[0], dataset.tensors[0]).to('cpu')
+    diss_matrix = torch.cdist(test_dataset.tensors[0], test_dataset.tensors[0]).to('cpu')
+    # ensure symmetry of diss_matrix
+    diss_matrix = diss_matrix.fill_diagonal_(0)
+    diss_matrix = (diss_matrix + diss_matrix.T) / 2
 
     smacof_time_start = datetime.now()
     res_smacof = torch.from_numpy(mds.fit_transform(diss_matrix))
@@ -139,7 +137,7 @@ if __name__ == '__main__':
 
     if args.visualise:
         with torch.no_grad():
-            visualise_embeddings(dataset.tensors[0], preds_model, res_smacof)
+            visualise_embeddings(train_dataset.tensors[0], preds_model, res_smacof)
 
     if args.wandb_log:
         wandb.log({
