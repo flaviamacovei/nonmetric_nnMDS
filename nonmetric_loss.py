@@ -18,7 +18,6 @@ def process_loss(preds_dataloader = None, refs_dataloader = None, device='cpu'):
 
     loss = 0
     for (batch_preds,), (batch_refs,) in zip(preds_dataloader, refs_dataloader):
-        print("called")
         batch_preds = batch_preds.to(device)
         batch_refs = batch_refs.to(device)
 
