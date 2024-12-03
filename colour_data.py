@@ -10,8 +10,8 @@ lab_colours = torch.from_numpy(np.array([colour.convert(data[1], 'CIE XYZ', 'CIE
 # data = torch.cdist(lab_colours, lab_colours)
 
 points_3d = torch.from_numpy(np.array([[0, 0, 0], [0, 0, 1], [0, 0, 3], [0, 3, 8], [10, 3, 15]])).float()
-dataset = TensorDataset(points_3d)
-# dataset = TensorDataset(lab_colours[:10])
+# dataset = TensorDataset(points_3d)
+dataset = TensorDataset(lab_colours[:10])
 
 """
 10 3 10

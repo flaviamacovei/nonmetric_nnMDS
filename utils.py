@@ -6,13 +6,12 @@ def visualise_embeddings(data, model_results, alg_results):
     data = data.to('cpu')
     model_results = model_results.to('cpu')
     alg_results = alg_results.to('cpu')
-    print(f"alg results: {alg_results}")
 
     fig, ax = plt.subplots()
 
     xs = model_results[:, 0].float()
     ys = model_results[:, 1].float()
-    ax.scatter(xs, ys, c = colours[:len(xs)])
+    ax.scatter(xs, ys)#, c = colours[:len(xs)])
     ax.set_aspect('equal')
     plt.savefig("out/2d_model.png")
     plt.clf()
@@ -20,10 +19,8 @@ def visualise_embeddings(data, model_results, alg_results):
     fig, ax = plt.subplots()
 
     xs = alg_results[:, 0].float()
-    print(f"alg xs: {xs}")
     ys = alg_results[:, 1].float()
-    print(f"alg ys: {ys}")
-    ax.scatter(xs, ys, c = colours[:len(xs)])
+    ax.scatter(xs, ys)#, c = colours[:len(xs)])
     ax.set_aspect('equal')
     plt.savefig("out/2d_smacof.png")
     plt.clf()
@@ -33,7 +30,7 @@ def visualise_embeddings(data, model_results, alg_results):
     xs = data[:, 0]
     ys = data[:, 1]
     zs = data[:, 2]
-    ax.scatter(xs, ys, zs, c = colours[:len(xs)])
+    ax.scatter(xs, ys, zs)#, c = colours[:len(xs)])
     ax.set_aspect('equal')
     plt.savefig("out/3d_points.png")
     plt.close('all')
@@ -45,7 +42,7 @@ def visualise(results, name):
 
     xs = results[:, 0].float()
     ys = results[:, 1].float()
-    ax.scatter(xs, ys, c = colours[:len(xs)])
+    ax.scatter(xs, ys)#, c = colours[:len(xs)])
     ax.set_aspect('equal')
     plt.savefig(f"out/{name}.png")
     plt.clf()
